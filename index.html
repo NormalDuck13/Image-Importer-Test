@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Viewer and Editor</title>
+    <title>Image Viewer</title>
     <style>
         body {
             display: flex;
@@ -16,23 +16,29 @@
         .file-input {
             margin: 20px;
         }
-        .canvas-container {
-            position: relative;
+        .image-display {
+            max-width: 80%;
+            max-height: 80%;
             border: 2px solid #ccc;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
-        canvas {
-            max-width: 80%;
-            max-height: 80%;
+        .image-display img {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
         }
-        .slider-container, .button-container, .color-container, .brush-container {
+        .slider-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 20px;
         }
-        .slider, .button, .color-picker, .brush-size {
+        .slider {
             margin: 10px;
+        }
+        .download-button {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -41,9 +47,7 @@
         <input type="file" id="fileInput" accept="image/*">
         <button onclick="displayImage()">Show Image</button>
     </div>
-    <div class="canvas-container">
-        <canvas id="canvas" width="800" height="600"></canvas>
-    </div>
+    <div class="image-display" id="imageDisplay"></div>
     <div class="slider-container">
         <label for="saturationSlider">Saturation</label>
         <input type="range" id="saturationSlider" class="slider" min="0" max="200" value="100">
@@ -52,83 +56,40 @@
         <label for="brightnessSlider">Brightness</label>
         <input type="range" id="brightnessSlider" class="slider" min="0" max="200" value="100">
     </div>
-    <div class="color-container">
-        <label for="colorPicker">Choose Color</label>
-        <input type="color" id="colorPicker" class="color-picker" value="#000000">
-    </div>
-    <div class="brush-container">
-        <label for="brushSize">Brush Size</label>
-        <select id="brushSize" class="brush-size">
-            <option value="2">2</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-        </select>
-    </div>
-    <div class="button-container">
-        <button class="button" onclick="setDrawMode('draw')">Draw</button>
-        <button class="button" onclick="setDrawMode('erase')">Erase</button>
-        <button class="button" onclick="downloadImage()">Download Image</button>
-    </div>
+    <button class="download-button" onclick="downloadImage()">Download Image</button>
     <script>
-        let canvas = document.getElementById('canvas');
-        let ctx = canvas.getContext('2d');
-        let drawMode = 'draw';
-        let drawing = false;
-        let brushColor = '#000000';
-        let brushSize = 5;
-
         function displayImage() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0);
-                        applyFilters();
-                    };
-                    img.src = e.target.result;
+                    const imageDisplay = document.getElementById('imageDisplay');
+                    imageDisplay.innerHTML = `<img src="${e.target.result}" alt="Selected Image" id="selectedImage">`;
+                    applyFilters();
                 };
                 reader.readAsDataURL(file);
+            } else {
+                alert('Please select an image file.');
             }
         }
 
         function applyFilters() {
+            const image = document.getElementById('selectedImage');
             const saturation = document.getElementById('saturationSlider').value;
             const hue = document.getElementById('hueSlider').value;
             const brightness = document.getElementById('brightnessSlider').value;
-            ctx.filter = `saturate(${saturation}%) hue-rotate(${hue}deg) brightness(${brightness}%)`;
-            ctx.drawImage(canvas, 0, 0);
-        }
-
-        function setDrawMode(mode) {
-            drawMode = mode;
-        }
-
-        canvas.addEventListener('mousedown', () => drawing = true);
-        canvas.addEventListener('mouseup', () => {
-            drawing = false;
-            ctx.beginPath();
-        });
-        canvas.addEventListener('mousemove', draw);
-
-        function draw(event) {
-            if (!drawing) return;
-            ctx.lineWidth = brushSize;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = drawMode === 'draw' ? brushColor : 'white';
-            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            image.style.filter = `saturate(${saturation}%) hue-rotate(${hue}deg) brightness(${brightness}%)`;
         }
 
         function downloadImage() {
+            const image = document.getElementById('selectedImage');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+            context.filter = image.style.filter;
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
             const link = document.createElement('a');
             link.href = canvas.toDataURL('image/png');
             link.download = 'edited-image.png';
@@ -138,8 +99,6 @@
         document.getElementById('saturationSlider').addEventListener('input', applyFilters);
         document.getElementById('hueSlider').addEventListener('input', applyFilters);
         document.getElementById('brightnessSlider').addEventListener('input', applyFilters);
-        document.getElementById('colorPicker').addEventListener('input', (e) => brushColor = e.target.value);
-        document.getElementById('brushSize').addEventListener('input', (e) => brushSize = e.target.value);
     </script>
 </body>
 </html>
