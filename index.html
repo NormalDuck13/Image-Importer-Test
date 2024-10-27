@@ -22,6 +22,15 @@
             border: 2px solid #ccc;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .slider {
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
@@ -30,6 +39,14 @@
         <button onclick="displayImage()">Show Image</button>
     </div>
     <div class="image-display" id="imageDisplay"></div>
+    <div class="slider-container">
+        <label for="saturationSlider">Saturation</label>
+        <input type="range" id="saturationSlider" class="slider" min="0" max="200" value="100">
+        <label for="hueSlider">Hue</label>
+        <input type="range" id="hueSlider" class="slider" min="0" max="360" value="0">
+        <label for="brightnessSlider">Brightness</label>
+        <input type="range" id="brightnessSlider" class="slider" min="0" max="200" value="100">
+    </div>
     <script>
         function displayImage() {
             const fileInput = document.getElementById('fileInput');
@@ -38,13 +55,26 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const imageDisplay = document.getElementById('imageDisplay');
-                    imageDisplay.innerHTML = `<img src="${e.target.result}" alt="Selected Image">`;
+                    imageDisplay.innerHTML = `<img src="${e.target.result}" alt="Selected Image" id="selectedImage">`;
+                    applyFilters();
                 };
                 reader.readAsDataURL(file);
             } else {
                 alert('Please select an image file.');
             }
         }
+
+        function applyFilters() {
+            const image = document.getElementById('selectedImage');
+            const saturation = document.getElementById('saturationSlider').value;
+            const hue = document.getElementById('hueSlider').value;
+            const brightness = document.getElementById('brightnessSlider').value;
+            image.style.filter = `saturate(${saturation}%) hue-rotate(${hue}deg) brightness(${brightness}%)`;
+        }
+
+        document.getElementById('saturationSlider').addEventListener('input', applyFilters);
+        document.getElementById('hueSlider').addEventListener('input', applyFilters);
+        document.getElementById('brightnessSlider').addEventListener('input', applyFilters);
     </script>
 </body>
 </html>
