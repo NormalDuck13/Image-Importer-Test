@@ -37,6 +37,9 @@
         .slider {
             margin: 10px;
         }
+        .download-button {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -53,6 +56,7 @@
         <label for="brightnessSlider">Brightness</label>
         <input type="range" id="brightnessSlider" class="slider" min="0" max="200" value="100">
     </div>
+    <button class="download-button" onclick="downloadImage()">Download Image</button>
     <script>
         function displayImage() {
             const fileInput = document.getElementById('fileInput');
@@ -76,6 +80,20 @@
             const hue = document.getElementById('hueSlider').value;
             const brightness = document.getElementById('brightnessSlider').value;
             image.style.filter = `saturate(${saturation}%) hue-rotate(${hue}deg) brightness(${brightness}%)`;
+        }
+
+        function downloadImage() {
+            const image = document.getElementById('selectedImage');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+            context.filter = image.style.filter;
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'edited-image.png';
+            link.click();
         }
 
         document.getElementById('saturationSlider').addEventListener('input', applyFilters);
