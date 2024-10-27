@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Viewer</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .file-input {
+            margin: 20px;
+        }
+        .image-display {
+            max-width: 80%;
+            max-height: 80%;
+            border: 2px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="file-input">
+        <input type="file" id="fileInput" accept="image/*">
+        <button onclick="displayImage()">Show Image</button>
+    </div>
+    <div class="image-display" id="imageDisplay"></div>
+    <script>
+        function displayImage() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imageDisplay = document.getElementById('imageDisplay');
+                    imageDisplay.innerHTML = `<img src="${e.target.result}" alt="Selected Image">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select an image file.');
+            }
+        }
+    </script>
+</body>
+</html>
